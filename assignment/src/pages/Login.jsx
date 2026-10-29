@@ -1,32 +1,22 @@
-/**
- * Process to build any form
- *      1. [X] UI Elements (HTML + CSS)
- *      2. [X] Setup states
- *      3. [X] Form Validation
- *      4. [X] Handle API call
- *      5. [X] Message handling: failure/success messages.
- */
-
-import { useState, useContext } from 'react';
-import { AuthContext } from '../context/AuthContext';
-import { useDispatch } from 'react-redux';
+import { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 
 function Login() {
-    // const { login } = useContext(AuthContext);
     const dispatch = useDispatch();
+    const navigate = useNavigate();
+    const user = useSelector(state => state.user);
 
     const [formData, setFormData] = useState({
-        email: '',
-        password: ''
+        email: 'test@test.com',
+        password: 'test'
     });
     const [errors, setErrors] = useState({});
     const [message, setMessage] = useState(null);
 
     const handleChange = (event) => {
-        // event.target.name; event.target.value
         setFormData({
             ...formData,
-            // [ ] square brackets tell javascript to evaluate value and not use it as is. 
             [event.target.name]: event.target.value 
         });
     };
@@ -35,12 +25,12 @@ function Login() {
         let isValid = true;
         let newErrors = {};
 
-        if (formData.email === '') {
+        if (!formData.email) {
             isValid = false;
             newErrors.email = 'Email cannot be empty';
         }
 
-        if (formData.password === '') {
+        if (!formData.password) {
             isValid = false;
             newErrors.password = 'Password cannot be empty';
         }
@@ -50,71 +40,117 @@ function Login() {
     };
 
     const handleSubmit = (event) => {
+        event.preventDefault();
         setErrors({});
         setMessage(null);
-        event.preventDefault(); // Practice Problem, identify the need for this.
 
         if (validate()) {
-            // We can proceed with API call.
-            // For now, we're hardcoding validation business logic
             if (formData.email === 'test@test.com' && formData.password === 'test') {
-                // We need to perform redirection
+                const loggedInUser = { name: 'John Doe', email: formData.email };
                 
-                // This will come from API call.
-                const user = { name: 'John', email: 'test@test.com' };
-                // login(user);
+                // Dispatch LOGIN action to Redux store
                 dispatch({
                     type: 'LOGIN',
-                    payload: user
+                    payload: loggedInUser
                 });
+
+                navigate('/dashboard');
             } else {
-                setErrors({ message: 'Invalid Credentials'});
+                setErrors({ message: 'Invalid credentials! (Use test@test.com / test)' });
             }
         }
     };
 
     return (
-        <div>
-            <h3>Login to continue</h3>
-
-            {message && (
-                <div style={{ color: 'green '}}>{message}</div>
-            )}
+        <div style={{
+            maxWidth: '440px',
+            margin: '50px auto',
+            padding: '30px',
+            background: '#ffffff',
+            borderRadius: '10px',
+            border: '1px solid #e2e8f0',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.06)',
+            fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+        }}>
+            <h2 style={{ marginBottom: '8px', color: '#1a202c' }}>Login</h2>
+            <p style={{ color: '#718096', fontSize: '0.9rem', marginBottom: '20px' }}>
+                Enter your credentials to test login and logout functionality.
+            </p>
 
             {errors.message && (
-                <div style={{ color: 'red'}}>{errors.message}</div>
+                <div style={{ padding: '10px', marginBottom: '15px', background: '#fff5f5', color: '#c53030', borderRadius: '6px', fontSize: '0.9rem' }}>
+                    {errors.message}
+                </div>
             )}
 
             <form onSubmit={handleSubmit}>
-                <div>
-                    <label>Email</label>
-                    <input name="email" onChange={handleChange}
-                        type="text" value={formData.email} 
-                        placeholder="Enter your email" 
+                <div style={{ marginBottom: '16px' }}>
+                    <label style={{ display: 'block', marginBottom: '6px', fontSize: '0.9rem', fontWeight: '500' }}>Email Address</label>
+                    <input 
+                        name="email" 
+                        onChange={handleChange}
+                        type="text" 
+                        value={formData.email} 
+                        placeholder="test@test.com"
+                        style={{
+                            width: '100%',
+                            padding: '10px 12px',
+                            border: '1px solid #cbd5e0',
+                            borderRadius: '6px',
+                            boxSizing: 'border-box',
+                            fontSize: '0.95rem'
+                        }}
                     />
                     {errors.email && (
-                        <label style={{ color: 'red' }}>{errors.email}</label>
+                        <span style={{ color: '#e53e3e', fontSize: '0.8rem', marginTop: '4px', display: 'block' }}>{errors.email}</span>
                     )}
-                    
                 </div>
 
-                <div>
-                    <label>Password</label>
-                    <input name="password" onChange={handleChange}
-                        type="password" value={formData.password} 
-                        placeholder="Enter your password" 
+                <div style={{ marginBottom: '20px' }}>
+                    <label style={{ display: 'block', marginBottom: '6px', fontSize: '0.9rem', fontWeight: '500' }}>Password</label>
+                    <input 
+                        name="password" 
+                        onChange={handleChange}
+                        type="password" 
+                        value={formData.password} 
+                        placeholder="test"
+                        style={{
+                            width: '100%',
+                            padding: '10px 12px',
+                            border: '1px solid #cbd5e0',
+                            borderRadius: '6px',
+                            boxSizing: 'border-box',
+                            fontSize: '0.95rem'
+                        }}
                     />
                     {errors.password && (
-                        <label style={{ color: 'red' }}>{errors.password}</label>
+                        <span style={{ color: '#e53e3e', fontSize: '0.8rem', marginTop: '4px', display: 'block' }}>{errors.password}</span>
                     )}
                 </div>
 
-                <div>
-                    <button type="submit">
-                        Submit
-                    </button>
-                </div>
+                <button 
+                    type="submit"
+                    style={{
+                        width: '100%',
+                        padding: '11px',
+                        background: '#007bff',
+                        color: '#ffffff',
+                        border: 'none',
+                        borderRadius: '6px',
+                        fontSize: '1rem',
+                        fontWeight: '600',
+                        cursor: 'pointer'
+                    }}
+                >
+                    Log In
+                </button>
             </form>
+
+            <div style={{ marginTop: '20px', padding: '10px', background: '#edf2f7', borderRadius: '6px', fontSize: '0.85rem', color: '#4a5568' }}>
+                💡 <strong>Demo Credentials:</strong><br/>
+                Email: <code>test@test.com</code><br/>
+                Password: <code>test</code>
+            </div>
         </div>
     );
 }
